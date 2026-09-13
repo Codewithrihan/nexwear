@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXWEAR | Official Store & Admin Control Center</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="toastNotice">Product Link Copied to Clipboard!</div>
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleBag()"></div>
+
+    <!-- OTP CUSTOMER LOGIN & REGISTER MODAL -->
+    <div class="modal-popup" id="userAuthModal">
+        <div class="modal-box-checkout" style="max-width: 420px; text-align: center;">
+            <span style="position: absolute; top: 15px; right: 18px; cursor: pointer; font-size: 1.3rem;" onclick="closeAuthModal()">&times;</span>
+            <i class="fa-solid fa-user-shield" style="font-size: 2.8rem; color: var(--kr-accent); margin-bottom: 12px;"></i>
+            <h3 style="text-transform: uppercase; font-weight: 800; margin-bottom: 6px;">Customer Verification</h3>
+            <p style="font-size: 0.82rem; color: var(--kr-gray-text); margin-bottom: 18px;">Enter mobile number to Login or Register via OTP</p>
+
+            <form id="otpPhoneForm" onsubmit="sendOTPProcess(event)">
+                <div class="form-group">
+                    <label>Full Name (For Registration)</label>
+                    <input type="text" id="custRegName" placeholder="Enter Full Name" required>
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="custRegPhone" placeholder="Enter 10 Digit Number" maxlength="10" required>
+                </div>
+                <button type="submit" class="btn-krutico">Send OTP Code</button>
+            </form>
+
+            <form id="otpVerifyForm" style="display: none;" onsubmit="verifyOTPProcess(event)">
+                <div class="form-group">
+                    <label>Enter 6-Digit Verification Code</label>
+                    <input type="text" id="custOtpInput" placeholder="Enter Code (Use 123456)" maxlength="6" required style="text-align: center; letter-spacing: 4px; font-weight: 800; font-size: 1.1rem;">
+                </div>
+                <button type="submit" class="btn-krutico">Verify & Complete Login</button>
+                <div style="font-size:0.72rem; color:var(--kr-accent); margin-top:8px;">Demo OTP: <b>123456</b></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT PRODUCT LISTING MODAL -->
+    <div class="modal-popup" id="newProductModal">
+        <div class="modal-box-checkout" style="max-width: 600px; padding: 35px;">
+            <div class="checkout-modal-header" style="margin-bottom: 15px;">
+                <h3 id="productModalTitle" style="font-size: 1.3rem; font-weight: 800;"><i class="fa-solid fa-circle-plus" style="color:var(--kr-accent);"></i> Add New Product Listing</h3>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.3rem; color: #9CA3AF;" onclick="closeNewProductModal()"></i>
+            </div>
+            <form id="addProductForm" onsubmit="handleSaveProduct(event)">
+                <input type="hidden" id="editProductId">
+                <div class="form-group"><label>Product Title</label><input type="text" id="pTitle" required placeholder="e.g. Designer Embroidered Kurti"></div>
+                
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="pCategory">
+                            <option value="Short Kurti">Short Kurti</option>
+                            <option value="Suit Sets">Suit Sets</option>
+                            <option value="Ethnic Tops">Ethnic Tops</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Stock Quantity (Units)</label><input type="number" id="pStock" required min="0" placeholder="25"></div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group"><label>Regular Price / MRP (₹)</label><input type="number" id="pOldPrice" required placeholder="1299"></div>
+                    <div class="form-group"><label>Selling / Discounted Price (₹)</label><input type="number" id="pPrice" required placeholder="799"></div>
+                </div>
+
+                <div class="form-group"><label>Fabric Type</label><input type="text" id="pFabric" required placeholder="Pure Cotton / Rayon / Chanderi Silk"></div>
+                <div class="form-group"><label>Full Description</label><textarea id="pDesc" rows="3" placeholder="Enter full details about this product..."></textarea></div>
+
+                <div class="form-group">
+                    <label>Product Images (Optional for Edit)</label>
+                    <input type="file" id="pImgFile" accept="image/*" multiple style="padding: 6px;">
+                </div>
+
+                <div class="form-group">
+                    <label>Available Colors</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label"><input type="checkbox" class="color-cb" value="Red" checked> Red</label>
+                        <label class="checkbox-label"><input type="checkbox" class="color-cb" value="Blue" checked> Blue</label>
+                        <label class="checkbox-label"><input type="checkbox" class="color-cb" value="Yellow"> Yellow</label>
+                        <label class="checkbox-label"><input type="checkbox" class="color-cb" value="Black"> Black</label>
+                        <label class="checkbox-label"><input type="checkbox" class="color-cb" value="Pink"> Pink</label>
+                        <label class="checkbox-label"><input type="checkbox" class="color-cb" value="Green"> Green</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Available Sizes</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label"><input type="checkbox" class="size-cb" value="S" checked> S</label>
+                        <label class="checkbox-label"><input type="checkbox" class="size-cb" value="M" checked> M</label>
+                        <label class="checkbox-label"><input type="checkbox" class="size-cb" value="L" checked> L</label>
+                        <label class="checkbox-label"><input type="checkbox" class="size-cb" value="XL"> XL</label>
+                        <label class="checkbox-label"><input type="checkbox" class="size-cb" value="XXL"> XXL</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-krutico" id="productSubmitBtn" style="margin-top:15px; padding:13px; font-size:0.85rem;">Publish Product Listing</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-popup active" id="welcomeModal">
+        <div class="modal-box-checkout" style="text-align: center; max-width: 420px;">
+            <span style="position: absolute; top: 15px; right: 18px; cursor: pointer; font-size: 1.3rem;" onclick="closeWelcomeModal()">&times;</span>
+            <i class="fa-solid fa-gift" style="font-size: 2.8rem; color: var(--kr-accent); margin-bottom: 12px;"></i>
+            <h3 style="text-transform: uppercase; font-weight: 800; margin-bottom: 6px;">Welcome to NEXWEAR!</h3>
+            <p style="font-size: 0.85rem; color: var(--kr-gray-text); margin-bottom: 15px;">Enjoy extra discounts on your order. Use Coupon Code:</p>
+            <div style="background: var(--kr-bg-subtle); padding: 10px; border: 1px dashed var(--kr-accent); font-weight: 800; letter-spacing: 2px; font-size: 1.1rem; margin-bottom: 20px; border-radius: 8px;">NEXWELCOME20</div>
+            <button class="btn-krutico" onclick="closeWelcomeModal()">Start Shopping</button>
+        </div>
+    </div>
+
+    <div class="bag-drawer" id="bagDrawer">
+        <div class="drawer-header">
+            <h4 style="text-transform: uppercase; font-size: 0.9rem;">My Cart</h4>
+            <i class="fa-solid fa-xmark" style="cursor: pointer;" onclick="toggleBag()"></i>
+        </div>
+        <div class="drawer-body" id="bagItems"></div>
+        <div style="border-top: 1px solid var(--kr-border); padding-top: 15px;">
+            <div style="display: flex; justify-content: space-between; font-weight: 800; margin-bottom: 15px;">
+                <span>Total Amount:</span>
+                <span id="cartTotal">₹0</span>
+            </div>
+            <button class="btn-krutico" onclick="openCheckoutModal()">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <div class="modal-popup" id="orderConfirmModal">
+        <div class="modal-box-checkout" style="text-align: center; max-width: 450px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 3.2rem; color: #22c55e; margin-bottom: 12px;"></i>
+            <h3 style="text-transform: uppercase; font-weight: 800; margin-bottom: 12px;">Order Placed Successfully!</h3>
+            <div style="font-size: 0.85rem; color: var(--kr-gray-text); margin-bottom: 20px; text-align: left; background:#F9FAFB; padding:15px; border-radius:10px; border:1px solid #E5E7EB; line-height:1.6;" id="popupOrderDetails"></div>
+            <button class="btn-krutico" onclick="closeOrderModal()">Continue Shopping</button>
+        </div>
+    </div>
+
+    <div class="modal-popup" id="checkoutFormModal">
+        <div class="modal-box-checkout">
+            <div class="checkout-modal-header">
+                <h3><i class="fa-solid fa-shield-halved" style="color:var(--kr-accent);"></i> Secure Checkout & Payment</h3>
+                <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem; color: #9CA3AF;" onclick="closeCheckoutModal()"></i>
+            </div>
+            
+            <form onsubmit="confirmOrderProcess(event)">
+                <div class="section-badge-title"><span>1</span> Delivery Address</div>
+                
+                <div class="form-row-2">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="cName" required placeholder="Rahul Sharma"></div>
+                    <div class="form-group"><label>Mobile Number</label><input type="tel" id="cPhone" required placeholder="9876543210"></div>
+                </div>
+
+                <div class="form-group"><label>Flat / House No. / Building Name</label><input type="text" id="cHouse" required placeholder="House No. 102, Royal Apartments"></div>
+                <div class="form-group"><label>Street / Area / Locality</label><input type="text" id="cStreet" required placeholder="MG Road, Sector 14"></div>
+                
+                <div class="form-row-2">
+                    <div class="form-group"><label>Landmark (Optional)</label><input type="text" id="cLandmark" placeholder="Near City Mall"></div>
+                    <div class="form-group"><label>City</label><input type="text" id="cCity" required placeholder="Jaipur"></div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group"><label>State</label><input type="text" id="cState" required placeholder="Rajasthan"></div>
+                    <div class="form-group"><label>Pincode</label><input type="text" id="cPincode" required placeholder="302001"></div>
+                </div>
+
+                <div class="section-badge-title"><span>2</span> Apply Coupon / Offer</div>
+                <div class="discount-card-wrap">
+                    <input type="text" id="cDiscountCode" placeholder="Enter Code (e.g. NEXWELCOME20)">
+                    <button type="button" class="btn-krutico" onclick="applyDiscount()">Apply</button>
+                </div>
+                <div id="discountMsg" style="font-size:0.75rem; margin-top:6px; font-weight:700;"></div>
+
+                <div class="section-badge-title"><span>3</span> Payment Verification (Mandatory)</div>
+                <div class="payment-option-grid-new">
+                    <div class="pay-card-new selected" onclick="selectPayment('COD', this)">
+                        <i class="fa-solid fa-hand-holding-dollar"></i> Cash On Delivery
+                    </div>
+                    <div class="pay-card-new" onclick="selectPayment('UPI', this)">
+                        <i class="fa-solid fa-qrcode"></i> UPI / QR Code
+                    </div>
+                    <div class="pay-card-new" onclick="selectPayment('Card', this)">
+                        <i class="fa-regular fa-credit-card"></i> Card Payment
+                    </div>
+                </div>
+
+                <div id="qrCodeContainer">
+                    <p style="font-size:0.78rem; font-weight:700; margin-bottom:8px; color:var(--kr-black);">Scan QR Code using any UPI App</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=nexwear@upi&pn=NEXWEAR&cu=INR" alt="Demo Payment QR">
+                </div>
+
+                <div class="order-summary-box-new">
+                    <div class="summary-row"><span>Cart Subtotal</span><span id="checkoutSubtotal">₹0</span></div>
+                    <div class="summary-row discount-row"><span>Applied Discount</span><span id="checkoutDiscountAmount">-₹0</span></div>
+                    <div class="summary-row total-row"><span>Final Payable</span><span id="checkoutFinalTotal">₹0</span></div>
+                </div>
+
+                <button type="submit" class="btn-krutico" style="margin-top: 20px; padding: 14px; font-size: 0.88rem;">Verify Payment & Confirm Order</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="top-announcement">
+        ✨ Welcome to NEXWEAR Store! | Special Offer: Get Extra Discount | Use Code: <b>NEXWELCOME20</b>
+    </div>
+
+    <header>
+        <div class="header-wrap">
+            <div class="nav-left">
+                <span class="nav-link" onclick="showStore()"><i class="fa-solid fa-house" style="font-size: 0.8rem; margin-right: 4px;"></i> HOME</span>
+            </div>
+            
+            <div class="brand-center">
+                <a href="#" onclick="showStore()" class="brand-logo">NEX<span>WEAR</span></a>
+            </div>
+
+            <div class="nav-right">
+                <button class="icon-btn-round" onclick="showTrackOrder()" title="Track Order">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </button>
+
+                <button class="icon-btn-round" id="myOrdersNavBtn" onclick="showCustomerOrders()" title="My Orders" style="display: none;">
+                    <i class="fa-solid fa-box-archive"></i>
+                </button>
+
+                <div class="icon-btn-round" onclick="toggleBag()" title="Cart">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="cart-badge" id="bagCount">0</span>
+                </div>
+
+                <div class="user-auth-pill" id="headerCustomerBtn" onclick="openCustomerAuthModal()">
+                    <i class="fa-regular fa-user"></i> <span id="custBtnLabel">Login / Register</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="storeSection">
+        <div class="hero-banner-slider">
+            <div class="hero-slides-wrapper" id="heroSlidesWrapper">
+                <div class="hero-slide"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80"><div class="hero-slide-content"><h2>Mega Festive Sale</h2><p>Up to 50% Off On Designer Suits</p></div></div>
+                <div class="hero-slide"><img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1200&q=80"><div class="hero-slide-content"><h2>New Kurti Arrival 2026</h2><p>Flat ₹300 Cashback | Use Code: NEX300</p></div></div>
+                <div class="hero-slide"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80"><div class="hero-slide-content"><h2>Buy 2 Get 1 Free</h2><p>Limited Period Ethnic Tops Offer</p></div></div>
+                <div class="hero-slide"><img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80"><div class="hero-slide-content"><h2>Free Express Delivery</h2><p>On All Orders Across India</p></div></div>
+            </div>
+        </div>
+
+        <div class="category-container">
+            <button class="cat-btn active" onclick="filterCategory('All', this)">All Items</button>
+            <button class="cat-btn" onclick="filterCategory('Short Kurti', this)">Short Kurtis</button>
+            <button class="cat-btn" onclick="filterCategory('Suit Sets', this)">Suit Sets</button>
+            <button class="cat-btn" onclick="filterCategory('Ethnic Tops', this)">Ethnic Tops</button>
+        </div>
+
+        <div class="section-header"><h2>Latest Collection 2026</h2></div>
+        <section class="products-grid" id="productsGrid"></section>
+    </div>
+
+    <div id="customerOrdersSection">
+        <div class="admin-dashboard-wrapper" style="max-width: 900px; margin: 0 auto;">
+            <div class="admin-top-bar">
+                <div>
+                    <h2 style="font-size: 1.4rem; font-weight: 800; text-transform: uppercase;"><i class="fa-solid fa-box-archive" style="color:var(--kr-accent);"></i> My Order History</h2>
+                    <p style="font-size: 0.82rem; color: #6B7280; font-weight: 600;">View your past orders, payment info, and live fulfillment status.</p>
+                </div>
+                <button class="btn-krutico" style="width: auto; padding: 8px 16px;" onclick="showStore()"><i class="fa-solid fa-arrow-left"></i> Continue Shopping</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Items Details</th>
+                            <th>Delivery Address</th>
+                            <th>Payment Status</th>
+                            <th>Total Amount</th>
+                            <th>Fulfillment Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerOrdersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="productDetailSection">
+        <button class="btn-krutico" style="width:auto; margin-bottom:20px; padding:6px 15px;" onclick="showStore()"><i class="fa-solid fa-arrow-left"></i> Back To Collection</button>
+
+        <div class="detail-wrapper">
+            <div class="detail-gallery">
+                <div class="thumb-list" id="detailThumbList"></div>
+                <img id="detailMainImg" class="main-detail-img" src="">
+            </div>
+            
+            <div class="detail-info">
+                <h1 id="detailTitle">Product Title</h1>
+                <div class="price-box">
+                    <div class="price" id="detailPrice">₹0</div>
+                    <div class="old-price" id="detailOldPrice">₹0</div>
+                    <div id="detailDiscountBadge" style="font-size:0.75rem; font-weight:800; color:#ef4444; background:#fee2e2; padding:2px 8px; border-radius:4px;"></div>
+                </div>
+                <div id="detailRatingBadge" style="margin-bottom: 12px;"></div>
+                <div id="detailStockBadge" style="margin-bottom: 12px;"></div>
+                
+                <div class="meta-badge"><i class="fa-solid fa-scroll"></i> Fabric: <span id="detailFabric">100% Cotton</span></div>
+                
+                <p id="detailDesc">Crafted with high-quality fabric designed for all-day comfort and effortless ethnic elegance.</p>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Select Color:</label>
+                    <div class="color-selector" id="detailColorList"></div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Select Size:</label>
+                    <div class="size-selector" id="detailSizeList"></div>
+                </div>
+
+                <button class="btn-krutico" style="padding:14px; font-size:0.85rem;" id="detailAddBtn">Add To Cart</button>
+
+                <div class="product-share-bar">
+                    <span class="share-label"><i class="fa-solid fa-share-nodes"></i> Share This Product:</span>
+                    <div class="share-actions-wrap">
+                        <button class="share-pill-btn btn-whatsapp-color" onclick="shareCurrentProduct('whatsapp')"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+                        <button class="share-pill-btn btn-facebook-color" onclick="shareCurrentProduct('facebook')"><i class="fa-brands fa-facebook-f"></i> Facebook</button>
+                        <button class="share-pill-btn btn-telegram-color" onclick="shareCurrentProduct('telegram')"><i class="fa-brands fa-telegram"></i> Telegram</button>
+                        <button class="share-pill-btn btn-copy-color" onclick="shareCurrentProduct('copy')"><i class="fa-solid fa-link"></i> Copy Link</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="reviews-container">
+            <h3 style="text-transform: uppercase; font-weight: 800; font-size:1.05rem; margin-bottom: 12px;">Customer Ratings & Reviews</h3>
+            
+            <div class="review-form-card">
+                <h4>Write a Review</h4>
+                <div class="star-rating-select" id="starInputGroup">
+                    <i class="fa-solid fa-star active" onclick="setReviewRating(1)"></i>
+                    <i class="fa-solid fa-star active" onclick="setReviewRating(2)"></i>
+                    <i class="fa-solid fa-star active" onclick="setReviewRating(3)"></i>
+                    <i class="fa-solid fa-star active" onclick="setReviewRating(4)"></i>
+                    <i class="fa-solid fa-star active" onclick="setReviewRating(5)"></i>
+                </div>
+                <div class="form-group" style="margin-bottom:8px;">
+                    <textarea id="reviewCommentInput" rows="2" placeholder="Share your experience with this product..."></textarea>
+                </div>
+                <button class="btn-krutico" style="width:auto; padding:6px 16px; font-size:0.72rem;" onclick="submitProductReview()">Submit Review</button>
+            </div>
+
+            <div id="reviewsListGroup"></div>
+        </div>
+
+        <div class="section-header" style="border-top:1px solid var(--kr-border); padding-top:40px;">
+            <h2>More Recommended Listings</h2>
+        </div>
+        <div class="products-grid" id="relatedProductsGrid"></div>
+    </div>
+
+    <div id="trackOrderSection">
+        <div class="admin-login-wrapper" style="max-width: 450px;">
+            <h3 style="text-transform: uppercase; margin-bottom: 15px; font-weight: 800; text-align: center;">Check Order Status</h3>
+            <div class="form-group">
+                <label>Registered Mobile Number</label>
+                <input type="tel" id="trackPhoneInput" placeholder="Enter 10 digit mobile number" style="width:100%;padding:11px 14px;border:1.5px solid #E5E7EB;border-radius:8px;">
+            </div>
+            <button class="btn-krutico" onclick="searchOrderStatus()">Search Status</button>
+            <div id="trackResultBox" style="margin-top: 20px; font-size: 0.85rem;"></div>
+        </div>
+    </div>
+
+    <div id="adminLoginSection">
+        <div class="admin-login-wrapper">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="width: 60px; height: 60px; background: var(--kr-black); color: var(--kr-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 15px;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 style="text-transform: uppercase; font-weight: 800; font-size: 1.3rem;">Admin Control Portal</h3>
+                <p style="font-size: 0.8rem; color: #6B7280; margin-top: 4px;">Sign in securely to manage store operations</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Admin Username</label>
+                    <input type="text" id="adminUser" required placeholder="admin" style="width:100%;padding:12px 14px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:0.9rem;">
+                </div>
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <input type="password" id="adminPass" required placeholder="admin123" style="width:100%;padding:12px 14px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:0.9rem;">
+                </div>
+                <p id="loginError" style="color: #ef4444; font-size: 0.78rem; font-weight: 700; display: none; margin-bottom: 12px; text-align: center;">❌ Incorrect username or password!</p>
+                
+                <button type="submit" class="btn-krutico" style="padding: 13px; font-size: 0.85rem; margin-top: 5px;">Login to Dashboard</button>
+            </form>
+
+            <div style="margin-top: 20px; background: #F9FAFB; border: 1px dashed #E5E7EB; padding: 12px; border-radius: 8px; font-size: 0.75rem; text-align: center; color: #6B7280;">
+                💡 <b>Demo Credentials:</b> Username: <code style="color:var(--kr-black); font-weight:700;">admin</code> | Password: <code style="color:var(--kr-black); font-weight:700;">admin123</code>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminDashboardSection">
+        <div class="admin-dashboard-wrapper">
+            <div class="admin-top-bar">
+                <div>
+                    <h2 style="font-size: 1.6rem; font-weight: 800; text-transform: uppercase;">Executive Admin Control Center</h2>
+                    <p style="font-size: 0.82rem; color: #6B7280; font-weight: 600;">Monitor inventory stocks, live revenues, and process customer orders.</p>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-krutico" style="width: auto; background: var(--kr-black); border-color: var(--kr-black); padding: 10px 20px;" onclick="openNewProductModal()">
+                        <i class="fa-solid fa-circle-plus"></i> + Add New Product
+                    </button>
+                    <button class="btn-krutico" style="width: auto; background: #ef4444; border-color: #ef4444; padding: 10px 20px;" onclick="handleLogout()">
+                        <i class="fa-solid fa-right-from-bracket"></i> Secure Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-stats-grid">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="admin-stat-info">
+                        <h4>Total Products</h4>
+                        <span id="statTotalProducts">0</span>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon"><i class="fa-solid fa-shopping-cart"></i></div>
+                    <div class="admin-stat-info">
+                        <h4>Total Orders</h4>
+                        <span id="statTotalOrders">0</span>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <div class="admin-stat-info">
+                        <h4>Total Revenue</h4>
+                        <span id="statTotalRevenue">₹0</span>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="admin-stat-info">
+                        <h4>Active Store</h4>
+                        <span style="font-size: 1.1rem; color: #16a34a; font-weight: 800; margin-top: 4px; display: block;"><i class="fa-solid fa-circle" style="font-size:0.6rem;"></i> Live Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" onclick="switchAdminTab('products', this)"><i class="fa-solid fa-boxes-stacked"></i> Product Inventory & Stock Catalog</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('orders', this)"><i class="fa-solid fa-receipt"></i> Customer Orders & Tracking</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('analytics', this)"><i class="fa-solid fa-chart-line"></i> Sales & Revenue Analytics</button>
+            </div>
+
+            <!-- TAB 1: PRODUCTS INVENTORY & STOCK -->
+            <div id="adminTabProducts" class="admin-tab-content">
+                <div class="admin-grid">
+                    <div class="admin-card" style="margin-bottom: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #E5E7EB; padding-bottom: 12px;">
+                            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;"><i class="fa-solid fa-list-check" style="color:var(--kr-accent);"></i> Stock & Inventory Status</h3>
+                            <button class="btn-krutico" style="width: auto; padding: 8px 16px; font-size: 0.72rem;" onclick="openNewProductModal()"><i class="fa-solid fa-plus"></i> Add New Product</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead><tr><th>Image</th><th>Title</th><th>Price / MRP</th><th>Stock Qty</th><th>Stock Status</th><th>Actions</th></tr></thead>
+                                <tbody id="adminProductTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: ORDERS MANAGEMENT -->
+            <div id="adminTabOrders" class="admin-tab-content" style="display: none;">
+                <div class="admin-card" style="margin-bottom: 0;">
+                    <h3><i class="fa-solid fa-receipt" style="color:var(--kr-accent);"></i> Customer Orders & Status Dispatch Control</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead><tr><th>Order ID</th><th>Customer Details</th><th>Delivery Address</th><th>Payment Status</th><th>Total Amount</th><th>Fulfillment Status</th></tr></thead>
+                            <tbody id="adminOrdersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: ANALYTICS -->
+            <div id="adminTabAnalytics" class="admin-tab-content" style="display: none;">
+                <div class="admin-card" style="margin-bottom: 0;">
+                    <h3><i class="fa-solid fa-chart-pie" style="color:var(--kr-accent);"></i> Store Business Overview</h3>
+                    <div style="padding: 20px; background: #FFFFFF; border-radius: 8px; border: 1px solid #E5E7EB;">
+                        <p style="font-size: 0.9rem; color: #4B5563; margin-bottom: 12px;"><b>Store Name:</b> NEXWEAR Official Store</p>
+                        <p style="font-size: 0.9rem; color: #4B5563; margin-bottom: 12px;"><b>Total Products Listed:</b> <span id="analyticsTotalProds">0</span> items</p>
+                        <p style="font-size: 0.9rem; color: #4B5563; margin-bottom: 12px;"><b>Total Orders Processed:</b> <span id="analyticsTotalOrders">0</span> orders</p>
+                        <p style="font-size: 0.9rem; color: #4B5563; margin-bottom: 0;"><b>Total Gross Revenue:</b> <span id="analyticsTotalRev" style="color:#16a34a; font-weight:800;">₹0</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="partner-box">
+            <h4>Authorized Business Partners</h4>
+            <p style="font-weight: 700; font-size: 0.95rem;">Tosif Khan &nbsp;|&nbsp; Narendra Mahawar</p>
+        </div>
+        <div class="social-round-links">
+            <a href="https://www.amazon.in" target="_blank"><i class="fa-brands fa-amazon"></i></a>
+            <a href="https://www.meesho.com" target="_blank"><i class="fa-solid fa-bag-shopping"></i></a>
+            <a href="https://www.flipkart.com" target="_blank"><i class="fa-solid fa-cart-shopping"></i></a>
+        </div>
+        &copy; 2026 NEXWEAR. All Rights Reserved.
+        <br>
+        <span class="footer-admin-link" onclick="openAdminPortal()"><i class="fa-solid fa-lock"></i> Admin Portal Login</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
